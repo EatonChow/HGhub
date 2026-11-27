@@ -108,7 +108,7 @@ Windows 客户端使用独立的 WebView2 InPrivate 窗口，每次登录创建�
 6. **字节区间变换**：带字节变换的 HLS BYTERANGE 当前明确返回 UNSUPPORTED；不对截断密文直接解密。
 7. **API 与可选功能**：RSA 必需 API 已实现，并通过真实 QuickJS 的两种 PEM/三种填充、随机性、明文/密钥边界与 requires 回归；网页登录已接入 Windows 和受支持的 Android 设备，其余平台未声明 `webview`。DASH 和下载为可选能力，当前未实现。hg.env.media 已接入当前 WebView 播放路径的能力 API 探测；仍需各平台实际媒体与后台恢复验收。
 8. **应用功能**：插件自检、数据清理和占用、应用更新。此项目不开发旧平台数据迁移。
-9. **平台验收**：Windows 原生窗口和五端完整媒体回归仍未完成；Android 已定位并修复文档选择器 URI 导入失败，粘贴与文件导入新 APK 实测成功。
+9. **平台验收**：Windows 原生窗口和五端完整媒体回归仍未完成；Android 已定位并修复文档选择器 URI 导入失败，粘贴与文件导入新 APK 实测成功。GitHub Actions 可在 macOS 上产出未签名 iOS IPA（bundle id `com.eatonchow.hghub`，最低系统 15.0），供免费 Apple ID 侧载。该包编入插件运行时与 loopback 媒体代理；应用内网页登录和原生方向锁定未接入，设备上的播放、导入与后台尚未验收。
 
 API 响应缓存当前只接纳显式 `credentials:"omit"` 且无 Authorization/Cookie 的 GET；
 对默认 include 但当时恰无 Cookie 的请求采取保守的缓存未命中，不改变响应语义。在途合并不要求启用响应缓存：默认 include 且当前请求不携带 Cookie 时也可合并；重定向到带 Cookie 的目标后，各等待者分别请求。

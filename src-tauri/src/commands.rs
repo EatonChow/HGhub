@@ -12,7 +12,14 @@ pub async fn set_orientation(landscape: bool, plugin: tauri::State<'_, Orientati
         .map_err(|error| error.to_string())
 }
 
-#[cfg(not(target_os = "android"))]
+#[cfg(target_os = "ios")]
+#[tauri::command]
+pub fn set_orientation(landscape: bool) -> Result<(), String> {
+    let _ = landscape;
+    Err("iOS 暂不支持应用内锁定屏幕方向，请转动设备".into())
+}
+
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
 #[tauri::command]
 pub fn set_orientation(landscape: bool) -> Result<(), String> {
     let _ = landscape;
