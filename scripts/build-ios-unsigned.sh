@@ -14,6 +14,11 @@ ADDR_FILE="$(node -p "require('os').tmpdir() + '/' + require('./src-tauri/tauri.
 mkdir -p artifacts
 rm -f "$ADDR_FILE"
 
+# `ios build` only refreshes an existing Xcode project. Generate it first.
+if ! compgen -G 'src-tauri/gen/apple/*.xcodeproj' > /dev/null; then
+  pnpm tauri ios init --ci --skip-targets-install
+fi
+
 pnpm tauri ios build --open --ci --features custom-protocol >"$LOG" 2>&1 &
 SESSION_PID=$!
 # `tauri ios build --open` launches the Xcode GUI and then sleeps. The options
