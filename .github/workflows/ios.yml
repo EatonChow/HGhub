@@ -1,0 +1,76 @@
+name: iOS
+
+# Unsigned IPA for sideloading. Push on this branch, or run it by hand.
+# release.yml still owns tagged releases and is not used here.
+on:
+  push:
+    branches:
+      - cursor/ios-unsigned-ipa-1be6
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ipa:
+    name: Unsigned iPhone IPA
+    runs-on: macos-15
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 使用 Xcode 16.4
+        run: |
+          set -euo pipefail
+          ls -d /Applications/Xcode*.app
+          sudo xcode-select -s /Applications/Xcode_16.4.app
+          xcodebuild -version
+          xcodebuild -showsdks | grep -i iphoneos
+
+      - name: 安装 XcodeGen
+        run: brew install xcodegen
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-ios
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri -> target
+          key: ios-unsigned
+
+      - name: 安装前端依赖
+        run: pnpm install --frozen-lockfile
+
+      - name: 构建未签名 IPA
+        env:
+          LIBCLANG_PATH: /Applications/Xcode_16.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib
+          IPHONEOS_DEPLOYMENT_TARGET: "15.0"
+        run: |
+          set -euo pipefail
+          V="$(node -p "require('./package.json').version")"
+          bash scripts/build-ios-unsigned.sh "$V"
+          cp "artifacts/HGhub_${V}_ios.ipa" HGhub.ipa
+          ls -lh HGhub.ipa
+          unzip -l HGhub.ipa | head -40
+
+      - name: 上传 HGhub.ipa
+        uses: actions/upload-artifact@v4
+        with:
+          name: HGhub.ipa
+          path: HGhub.ipa
+          if-no-files-found: error
+          retention-days: 30

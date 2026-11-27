@@ -663,7 +663,14 @@ impl Worker {
                                         })
                                     })
                                     .ok_or_else(|| {
-                                        PluginError::new("UNSUPPORTED", "请从账号登录按钮打开网页")
+                                        PluginError::new(
+                                            "UNSUPPORTED",
+                                            if cfg!(target_os = "ios") {
+                                                "iOS 暂不支持应用内网页登录"
+                                            } else {
+                                                "请从账号登录按钮打开网页"
+                                            },
+                                        )
                                     })?;
                                 if calls.values().any(|c| c.web_wait.is_some()) {
                                     return Err(PluginError::new(
